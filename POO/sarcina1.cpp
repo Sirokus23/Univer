@@ -1,0 +1,147 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+typedef struct Product {
+    string nume;
+    double pret;
+    int cantitate;
+} Product;
+
+void meniu();
+int cautareProdus(Product* producte, int n, string nume);
+void afisareProduse(Product* producte, int n);
+void afisareProdus(Product* producte, int n, int index);
+void cumparareProdus(Product* producte, int n);
+struct Product* creareArray(Product* producte, int n);
+
+int main(){
+    int n = 2;
+    Product* producte = new Product[n];
+    if (producte == NULL) {
+        cout << "Eroare la alocarea memoriei" << endl;
+        return 1;
+    }
+
+    producte = creareArray(producte, n);
+
+    int optiune;
+    do {
+        meniu();
+        cout << "Alegeti optiunea: " << endl;
+        cin >> optiune;
+
+        switch (optiune) {
+            case 1:
+                afisareProduse(producte, n);
+                break;
+            case 2:
+                cumparareProdus(producte, n);
+                break;
+            case 3:
+                cout << "La revedere" << endl;
+                break;
+            default:
+                cout << "Optiune invalida" << endl;
+        }
+    }while (optiune != 3);
+
+    delete[] producte;
+    return 0;
+}
+
+void meniu(){
+    cout << "1.Afisare Produs" << endl;
+    cout << "2.Cumparare Produs" << endl;
+    cout << "3. Iesire" << endl;
+}
+
+int cautareProduse(Product* product, int n, string nume) {
+    for (int i = 0; i < n; i++) {
+        if (strcmp(product[i].nume.c_str(), nume.c_str()) == 0)
+            return i;
+    }
+    return -1;
+}
+
+void afisareProdus(Product* product, int n, int index) {
+    for (int i = 0;i < n; i++){
+        if (i == index) {
+            cout << "Produs " << i + 1 << endl;
+            cout << "Denumire: " << product[index].nume << endl;
+            cout << "Cantitate: " << product[index].cantitate << endl;
+        }
+    }
+}
+
+void cumparareProdus(Product* product, int n) {
+    int alegere;
+    string denumire;
+    int index;
+    int cantitateDorita;
+
+    afisareProduse(product, n);
+
+    cout << "Alegeti forma de cautare" << endl;
+    cout << "1. Dupa nume" << endl;
+    cout << "2. Dupa numar" << endl;
+    cout << "Alegeti optiunea: ";
+    cin >> alegere;
+
+    if (alegere == 1) {
+        cout << "Introduceri denumirea produsului: " << endl;
+        cin >> denumire;
+        index = cautareProduse(product, n, denumire);
+        afisareProdus(product, n, index);
+
+        if (index == -1) {
+            cout << "Produsul nu a fost gasit" << endl;
+            return;
+        }
+    } else if (alegere == 2) {
+        cout << "Introduceti numarul produsului: " << endl;
+        cin >> index;
+        index--;
+        afisareProdus(product, n, index);
+
+        if (index < 0 || index >= n){
+            cout << "Numar invalid" << endl;
+            return;
+        }
+    }else {
+        cout << "Optiune invalida" << endl;
+        return;
+    }
+
+    cout << "Introduceti cantitatea dorita" << endl;
+    cin >> cantitateDorita;
+
+    if (cantitateDorita > product[index].cantitate) {
+        cout << "Nu sunt suficiente produse in stoc" << endl;
+        return;
+    } else {
+        product[index].cantitate -= cantitateDorita;
+        cout << "Produs achizitionat" << endl;
+    }
+}
+
+void afisareProduse(Product* product, int n){
+    for (int i = 0; i < n; i++){
+        cout << "Produs " << i + 1 << endl;
+        cout << "Denumire: " << product[i].nume << endl;
+        cout << "Pret: " << product[i].pret << endl;
+        cout << "Cantitate: " << product[i].cantitate << endl;
+    }
+}
+
+Product* creareArray(Product* producte, int n) {
+    for (int i = 0; i < n; i++) {
+        cout << "Introduceti denumirea produslui " << i + 1 << ": ";
+        cin >> producte[i].nume;
+        cout << "Introduceti pretul produslui " << i + 1 << ": ";
+        cin >> producte[i].pret;
+        cout << "Introduceti cantitatea produslui " << i + 1 << ": ";
+        cin >> producte[i].cantitate;
+    }
+    return producte;
+}
