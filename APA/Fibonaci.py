@@ -1,5 +1,22 @@
 import math
-from decimal import Decimal
+
+def power_log_n(a, n, counter): #Functie ajutatoare pentru a calcula costul functiei pow in spatiul O(log n)
+    rezultat = 1
+    baza = a
+    counter[0]+=1
+    while n > 0:
+        # Dacă ultimul bit al lui n este 1 (n este impar)
+        counter[0]+=1 
+        counter[0]+=1 
+        if n % 2 == 1:
+            rezultat *= baza
+            counter[0]+=1 
+        
+        baza *= baza  # Ridicăm baza la pătrat
+        n //= 2       # Împărțim n la 2 (sau n >>= 1)
+        counter[0]+=2
+    counter[0]+=1 
+    return rezultat
 
 def fib1(n, counter):  #recursiv
     if n < 2:
@@ -42,11 +59,26 @@ def fib3(n, counter):
     counter[0]+=1
     return j, counter[0]
 
-def fib4(n):
-    root5 = Decimal(5).sqrt()
-    fi = (Decimal(1) + root5)/Decimal(2)
-    psi = (Decimal(1) - root5)/Decimal(2)
-    return round((fi**n - psi**n)/root5)
+import math
+
+def fib4(n, counter):
+    radical5 = math.sqrt(5)
+    counter[0]+=1
+    fi = (1 + radical5) / 2
+    psi = (1 - radical5) / 2
+    counter[0]+=4
+    pow_fi = power_log_n(fi, n, counter)
+    pow_psi = power_log_n(psi, n, counter)
+
+    diff = (pow_fi - pow_psi)/radical5
+    counter[0]+=1
+
+    rezultat = round(diff)
+    counter[0]+=1
+
+    return rezultat
+    
+
 
 def main():
     print("====Meniu====")
@@ -73,7 +105,9 @@ def main():
         print(result, nop)
     elif alegere == 4:
         n = int(input("Al citalea nr fibbonaci: "))
-        result = fib4(n)
-        print(result)
+        counter = [0]
+        result = fib4(n, counter)
+        print(f"Fibonacci({n}) = {result}")
+        print(f"Total Operations & Comparisons Counted: {counter[0]}")
 
 main()

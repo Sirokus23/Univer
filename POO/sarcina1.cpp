@@ -16,7 +16,7 @@ void cumparareProdus(Product* producte, int n);
 struct Product* creareArray(Product* producte, int n);
 
 int main(){
-    int n = 2;
+    int n = 10;
     Product* producte = new Product[n];
     if (producte == NULL) {
         cout << "Eroare la alocarea memoriei" << endl;
@@ -58,7 +58,7 @@ void meniu(){
 
 int cautareProduse(Product* product, int n, string nume) {
     for (int i = 0; i < n; i++) {
-        if (strcmp(product[i].nume.c_str(), nume.c_str()) == 0)
+        if (product[i].nume == nume)
             return i;
     }
     return -1;
@@ -92,22 +92,26 @@ void cumparareProdus(Product* product, int n) {
         cout << "Introduceri denumirea produsului: " << endl;
         cin >> denumire;
         index = cautareProduse(product, n, denumire);
-        afisareProdus(product, n, index);
 
         if (index == -1) {
             cout << "Produsul nu a fost gasit" << endl;
             return;
         }
+
+        afisareProdus(product, n, index);
+
     } else if (alegere == 2) {
         cout << "Introduceti numarul produsului: " << endl;
         cin >> index;
         index--;
-        afisareProdus(product, n, index);
 
         if (index < 0 || index >= n){
             cout << "Numar invalid" << endl;
             return;
         }
+
+        afisareProdus(product, n, index);
+        
     }else {
         cout << "Optiune invalida" << endl;
         return;
@@ -120,8 +124,9 @@ void cumparareProdus(Product* product, int n) {
         cout << "Nu sunt suficiente produse in stoc" << endl;
         return;
     } else {
+        double total = cantitateDorita * product[index].pret;
+        cout << "Produs achizitionat. Total de plata: " << total << " lei" << endl;
         product[index].cantitate -= cantitateDorita;
-        cout << "Produs achizitionat" << endl;
     }
 }
 
