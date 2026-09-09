@@ -92,22 +92,21 @@ def main():
         n = int(input("Al citalea nr fibbonaci: "))
         counter = [0]
         valoare = fib1(n, counter)
-        print(valoare, counter[0])
+        print(f"Nr Fibbonaci:{valoare} Nop: {counter[0]}")
     elif alegere == 2:
         n = int(input("Al citalea nr fibbonaci: "))
         counter = [0]
         result, nop = fib2(n, counter)
-        print(result, nop)
+        print(f"Nr Fibbonaci:{result} Nop: {nop}")
     elif alegere == 3:
         n = int(input("Al citalea nr fibbonaci: "))
         counter=[0]
         result, nop = fib3(n, counter)
-        print(result, nop)
+        print(f"Nr Fibbonaci:{result} Nop: {nop}")
     elif alegere == 4:
         n = int(input("Al citalea nr fibbonaci: "))
         counter = [0]
         result = fib4(n, counter)
-        print(f"Fibonacci({n}) = {result}")
-        print(f"Total Operations & Comparisons Counted: {counter[0]}")
+        print(f"Nr Fibbonaci:{result} Nop: {counter[0]}")
 
 main()

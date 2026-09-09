@@ -67,9 +67,7 @@ int cautareProduse(Product* product, int n, string nume) {
 void afisareProdus(Product* product, int n, int index) {
     for (int i = 0;i < n; i++){
         if (i == index) {
-            cout << "Produs " << i + 1 << endl;
-            cout << "Denumire: " << product[index].nume << endl;
-            cout << "Cantitate: " << product[index].cantitate << endl;
+            cout << "Produs " << i + 1 << ": " << product[i].nume << "  Pret: " << product[i].pret << "  Cantitate: " << product[i].cantitate << endl;
         }
     }
 }
@@ -132,21 +130,21 @@ void cumparareProdus(Product* product, int n) {
 
 void afisareProduse(Product* product, int n){
     for (int i = 0; i < n; i++){
-        cout << "Produs " << i + 1 << endl;
-        cout << "Denumire: " << product[i].nume << endl;
-        cout << "Pret: " << product[i].pret << endl;
-        cout << "Cantitate: " << product[i].cantitate << endl;
+        cout << "Produs " << i + 1 << ": " << product[i].nume << "  Pret: " << product[i].pret << "  Cantitate: " << product[i].cantitate << endl;
     }
 }
 
 Product* creareArray(Product* producte, int n) {
-    for (int i = 0; i < n; i++) {
-        cout << "Introduceti denumirea produslui " << i + 1 << ": ";
-        cin >> producte[i].nume;
-        cout << "Introduceti pretul produslui " << i + 1 << ": ";
-        cin >> producte[i].pret;
-        cout << "Introduceti cantitatea produslui " << i + 1 << ": ";
-        cin >> producte[i].cantitate;
-    }
+    producte[0] = {"Robinet", 250.50, 15};
+    producte[1] = {"Baterie", 180.00, 20};
+    producte[2] = {"Dus", 420.75, 8};
+    producte[3] = {"Teava", 12.30, 100};
+    producte[4] = {"Cupru", 25.90, 60};
+    producte[5] = {"Filtru", 350.00, 12};
+    producte[6] = {"Pompa", 890.00, 5};
+    producte[7] = {"Furtun", 35.20, 40};
+    producte[8] = {"Sifon", 45.60, 30};
+    producte[9] = {"WC", 620.00, 10};
+
     return producte;
 }
