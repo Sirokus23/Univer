@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build raylib test",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-IC:/msys64/mingw64/include",
+                "-LC:/msys64/mingw64/lib",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm",
+                "-std=c++17"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Compilează fișierul curent și îl leagă cu raylib"
+        }
+    ]
+}
