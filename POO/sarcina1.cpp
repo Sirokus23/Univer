@@ -135,10 +135,10 @@ void afisareProduse(Product* product, int n){
 
 Product* creareArray(Product* producte, int n) {
     producte[0] = {"Robinet", 250.50, 15};
-    producte[1] = {"Baterie", 180.00, 20};
-    producte[2] = {"Dus", 420.75, 8};
+    producte[1] = {"Lavuar", 180.00, 20};
+    producte[2] = {"Radiator", 770.75, 8};
     producte[3] = {"Teava", 12.30, 100};
-    producte[4] = {"Cupru", 25.90, 60};
+    producte[4] = {"Boiler", 2485.90, 7};
     producte[5] = {"Filtru", 350.00, 12};
     producte[6] = {"Pompa", 890.00, 5};
     producte[7] = {"Furtun", 35.20, 40};
