@@ -11,7 +11,6 @@ void meniu();
 int cautareProdus(Product* producte, int n, string nume);
 void afisareProduse(Product* producte, int n);
 void afisareProdus(Product* producte, int n, int index);
-void cumparareProdus(Product* producte, int n);
 struct Product* creareArray(Product* producte, int n);
 
 int main(){
@@ -35,7 +34,7 @@ int main(){
                 afisareProduse(producte, n);
                 break;
             case 2:
-                cumparareProdus(producte, n);
+                afisareProduse(producte, n);
                 break;
             case 3:
                 cout << "La revedere" << endl;
@@ -68,62 +67,6 @@ void afisareProdus(Product* product, int n, int index) {
         if (i == index) {
             cout << "Produs " << i + 1 << ": " << product[i].nume << "  Pret: " << product[i].pret << "  Cantitate: " << product[i].cantitate << endl;
         }
-    }
-}
-
-void cumparareProdus(Product* product, int n) {
-    int alegere;
-    string denumire;
-    int index;
-    int cantitateDorita;
-
-    afisareProduse(product, n);
-
-    cout << "Alegeti forma de cautare" << endl;
-    cout << "1. Dupa nume" << endl;
-    cout << "2. Dupa numar" << endl;
-    cout << "Alegeti optiunea: ";
-    cin >> alegere;
-
-    if (alegere == 1) {
-        cout << "Introduceri denumirea produsului: " << endl;
-        cin >> denumire;
-        index = cautareProduse(product, n, denumire);
-
-        if (index == -1) {
-            cout << "Produsul nu a fost gasit" << endl;
-            return;
-        }
-
-        afisareProdus(product, n, index);
-
-    } else if (alegere == 2) {
-        cout << "Introduceti numarul produsului: " << endl;
-        cin >> index;
-        index--;
-
-        if (index < 0 || index >= n){
-            cout << "Numar invalid" << endl;
-            return;
-        }
-
-        afisareProdus(product, n, index);
-        
-    }else {
-        cout << "Optiune invalida" << endl;
-        return;
-    }
-
-    cout << "Introduceti cantitatea dorita" << endl;
-    cin >> cantitateDorita;
-
-    if (cantitateDorita > product[index].cantitate) {
-        cout << "Nu sunt suficiente produse in stoc" << endl;
-        return;
-    } else {
-        double total = cantitateDorita * product[index].pret;
-        cout << "Produs achizitionat. Total de plata: " << total << " lei" << endl;
-        product[index].cantitate -= cantitateDorita;
     }
 }
 

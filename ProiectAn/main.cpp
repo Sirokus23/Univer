@@ -35,7 +35,7 @@ int main() {
     while (!WindowShouldClose()){
         BeginDrawing();
 
-            ClearBackground(BLACK);
+            ClearBackground(RED);
             DrawText("Ebati loh", 190,200, 20, WHITE);
             EndDrawing();
     }
