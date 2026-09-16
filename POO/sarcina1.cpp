@@ -45,15 +45,12 @@ int main(){
                 cumparareProdus(producte, n, cos, cosSize);
                 break;
             case 3:
-                finalizarePlata(cos, cosSize);
-                break;
-            case 4:
                 cout << "La revedere" << endl;
                 break;
             default:
                 cout << "Optiune invalida" << endl;
         }
-    } while (optiune != 4);
+    } while (optiune != 3);
 
     delete[] producte;
     delete[] cos;
@@ -63,8 +60,7 @@ int main(){
 void meniu(){
     cout << "1. Afisare Produse" << endl;
     cout << "2. Cumparare Produs" << endl;
-    cout << "3. Finalizare Plata" << endl;
-    cout << "4. Iesire" << endl;
+    cout << "3. Iesire" << endl;
 }
 
 int cautareProdus(Product* product, int n, string nume) {
@@ -117,6 +113,7 @@ void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize) {
     cout << "2. Numar (din lista afisata)" << endl;
     cout << "3. Elimina un produs din cos" << endl;
     cout << "4. Afiseaza cosul" << endl;
+    cout << "5. Finalizare Plata" << endl;
     cout << "Alegeti optiunea: ";
     cin >> optiuneCautare;
 
@@ -127,6 +124,11 @@ void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize) {
 
     if (optiuneCautare == 4) {
         afisareCos(producte, n, cos, cosSize);
+        return;
+    }
+
+    if (optiuneCautare == 5) {
+        finalizarePlata(cos, cosSize);
         return;
     }
 
@@ -274,7 +276,7 @@ void finalizarePlata(Product* cos, int &cosSize) {
     }
 
     double total = 0;
-    cout << "--- Chitanta ---" << endl;
+    cout << " Chitanta " << endl;
     for (int i = 0; i < cosSize; i++) {
         double subtotal = cos[i].pret * cos[i].cantitate;
         cout << cos[i].nume << "  x" << cos[i].cantitate
