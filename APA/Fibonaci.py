@@ -58,7 +58,7 @@ def fib3(n, counter, iteratii):
         h = 2 * k * h + t
         k = k ** 2 + t
         n = n // 2
-        counter[0] += 6
+        counter[0] += 7
     counter[0] += 1  
     return j, counter[0]
 

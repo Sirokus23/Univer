@@ -12,10 +12,10 @@ int cautareProdus(Product* producte, int n, string nume);
 void afisareProduse(Product* producte, int n);
 void afisareProdus(Product* producte, int n, int index);
 Product* creareArray(Product* producte, int n);
-
 void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize);
 void afisareCos(Product* producte, int n, Product* cos, int &cosSize);
 void eliminareDinCos(Product* producte, int n, Product* cos, int &cosSize);
+void finalizarePlata(Product* cos, int &cosSize);
 
 int main(){
     int n = 10;
@@ -27,7 +27,7 @@ int main(){
 
     producte = creareArray(producte, n);
 
-    const int MAX_COS = 10;
+    int MAX_COS = 10;
     Product* cos = new Product[MAX_COS];
     int cosSize = 0;
 
@@ -45,12 +45,15 @@ int main(){
                 cumparareProdus(producte, n, cos, cosSize);
                 break;
             case 3:
+                finalizarePlata(cos, cosSize);
+                break;
+            case 4:
                 cout << "La revedere" << endl;
                 break;
             default:
                 cout << "Optiune invalida" << endl;
         }
-    } while (optiune != 3);
+    } while (optiune != 4);
 
     delete[] producte;
     delete[] cos;
@@ -60,7 +63,8 @@ int main(){
 void meniu(){
     cout << "1. Afisare Produse" << endl;
     cout << "2. Cumparare Produs" << endl;
-    cout << "3. Iesire" << endl;
+    cout << "3. Finalizare Plata" << endl;
+    cout << "4. Iesire" << endl;
 }
 
 int cautareProdus(Product* product, int n, string nume) {
@@ -167,14 +171,11 @@ void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize) {
         return;
     }
 
-    // scade stocul
     producte[index].cantitate -= cantitateCeruta;
 
-    // afiseaza costul acestei cumparari
     double costTranzactie = producte[index].pret * cantitateCeruta;
     cout << "Cost total pentru aceasta cumparare: " << costTranzactie << " MDL" << endl;
 
-    // verifica daca produsul e deja in cos, daca da doar mareste cantitatea
     string nume = producte[index].nume;
     bool gasitInCos = false;
     for (int i = 0; i < cosSize; i++) {
@@ -185,7 +186,6 @@ void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize) {
         }
     }
 
-    // altfel adauga o intrare noua in cos
     if (!gasitInCos) {
         cos[cosSize].nume = producte[index].nume;
         cos[cosSize].pret = producte[index].pret;
@@ -193,7 +193,6 @@ void cumparareProdus(Product* producte, int n, Product* cos, int &cosSize) {
         cosSize++;
     }
 
-    // afiseaza cosul actualizat
     afisareCos(producte, n, cos, cosSize);
 }
 
@@ -251,22 +250,52 @@ void eliminareDinCos(Product* producte, int n, Product* cos, int &cosSize) {
         return;
     }
 
-    // returneaza cantitatea in stoc
     int indexProdus = cautareProdus(producte, n, nume);
     if (indexProdus != -1) {
         producte[indexProdus].cantitate += cantitateDeEliminat;
     }
 
     if (cantitateDeEliminat == cantitateMax) {
-        // eliminam complet intrarea din cos, mutam restul cu o pozitie in stanga
         for (int i = indexCos; i < cosSize - 1; i++) {
             cos[i] = cos[i + 1];
         }
         cosSize--;
     } else {
-        // doar reducem cantitatea din cos
         cos[indexCos].cantitate -= cantitateDeEliminat;
     }
 
     cout << "Eliminat din cos: " << cantitateDeEliminat << " x " << nume << endl;
+}
+
+void finalizarePlata(Product* cos, int &cosSize) {
+    if (cosSize == 0) {
+        cout << "Cosul este gol. Nu exista nimic de platit." << endl;
+        return;
+    }
+
+    double total = 0;
+    cout << "--- Chitanta ---" << endl;
+    for (int i = 0; i < cosSize; i++) {
+        double subtotal = cos[i].pret * cos[i].cantitate;
+        cout << cos[i].nume << "  x" << cos[i].cantitate
+             << "  Pret unitar: " << cos[i].pret
+             << "  Subtotal: " << subtotal << endl;
+        total += subtotal;
+    }
+    cout << "Total de plata: " << total << " MDL" << endl;
+
+    double sumaPlatita;
+    cout << "Introduceti suma platita: ";
+    cin >> sumaPlatita;
+
+    if (sumaPlatita < total) {
+        cout << "Suma insuficienta. Mai sunt necesari " << (total - sumaPlatita) << " MDL." << endl;
+        return;
+    }
+
+    double rest = sumaPlatita - total;
+    cout << "Plata efectuata cu succes." << endl;
+    cout << "Rest: " << rest << " MDL" << endl;
+
+    cosSize = 0;
 }
