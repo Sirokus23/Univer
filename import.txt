@@ -1,0 +1,43 @@
+* Light Sensor Circuit with AC-Coupled Inverting Amplifier (LM358)
+* Direct import file
+
+* --- POWER SUPPLY ---
+VCC 5V 0 DC 5V
+
+* --- LDR VOLTAGE DIVIDER (Node A) ---
+* RLDR represents the LDR light resistance (10k nominal light value)
+RLDR 5V nodeA 10k
+R1 nodeA 0 10k
+
+* --- BIAS VOLTAGE DIVIDER (Vbias = 2.5V) ---
+Rref1 5V Vbias 100k
+Rref2 Vbias 0 100k
+
+* --- AC COUPLING & INVERTING INPUT STAGE ---
+C1 nodeA node_ac 10u
+Rin node_ac in_neg 10k
+
+* --- FEEDBACK RESISTOR ---
+Rf in_neg V_out 100k
+
+* --- OP-AMP INSTANTIATION (LM358 Subcircuit) ---
+* Node Order: non-inverting(+), inverting(-), V+, V-, output
+X1 Vbias in_neg 5V 0 V_out LM358_MODEL
+
+* --- LM358 SUBCIRCUIT DEFINITION ---
+.subckt LM358_MODEL non_inv inv pos_pwr neg_pwr out
+* High input impedance
+Rin_op non_inv inv 1Meg
+* Voltage gain stage
+E1 int_node 0 non_inv inv 100k
+* Low-pass pole modeling op-amp frequency response
+R1_op int_node int_node2 1k
+C1_op int_node2 0 15.9uF
+* Output buffer stage
+Eout out 0 int_node2 0 1
+.ends LM358_MODEL
+
+* --- ANALYSIS COMMANDS ---
+.tran 0.1m 100m
+
+.end
