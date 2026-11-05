@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace Config {
-    constexpr int Latime = 1920;
+    constexpr int Latime = 1820;
     constexpr int Inaltime = 1080;
 
     constexpr int PasMic = 100;          // UP / DOWN
@@ -15,6 +15,13 @@ namespace Config {
     constexpr float RazaMin = 8.0f;
     constexpr float RazaMax = 16.0f;
     constexpr float VitezaMax = 110.0f;   // initial speed per axis, +-
+
+    // Rare giant balls (key M). The grid adapts its cell size automatically when one exists.
+    constexpr float RazaGigantMin = 28.0f;
+    constexpr float RazaGigantMax = 36.0f;
+
+    constexpr float Gravitatie = 1100.0f;     // px/s^2 when gravity is on (key G)
+    constexpr float VitezaRosu = 450.0f;      // speed that maps to the hottest colour ("speed colours")
 
     constexpr float MarimeCelula = 50.0f;
     static_assert(MarimeCelula >= 2.0f * RazaMax, "grid cell must be at least one ball diameter");
@@ -47,6 +54,9 @@ struct Obiecte {
     std::vector<Color> culoare;
     std::vector<float> flash;               // 1 right after a collision, fades to 0 (drawn towards white)
 
+    float gravitatie = 0.0f;                // px/s^2 added to vy every step
+    float restitutie = 1.0f;                // 1 = perfectly elastic, lower = bounces lose energy (balls and walls)
+
     int Size() const { return (int)poz.size(); }
     void Adauga(Vector2 p, Vector2 v, float r, Color c);
     void EliminaUltimele(int k);
@@ -58,11 +68,12 @@ struct Obiecte {
     void ApplicaForta(Vector2 centru, float razaCamp, float acceleratie, float dt);   // repel from a point
     void Amortizeaza(float dt);                                                        // bleed fast balls back to a calm speed
 
-    void Deseneaza(const Texture2D& cerc, float alpha = 1.0f) const;
+    void Deseneaza(const Texture2D& cerc, float alpha = 1.0f, bool dupaViteza = false) const;
 };
 
-void GenereazaObiecte(Obiecte& obiecte, int nr, int latimeEcran, int inaltimeEcran, std::mt19937& gen);
+void GenereazaObiecte(Obiecte& obiecte, int nr, int latimeEcran, int inaltimeEcran, std::mt19937& gen, float scara = 1.0f);
 void GenereazaObiectLa(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen);
+void GenereazaGigant(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen);
 
 // Pre-rendered shaded ball: one textured quad is much cheaper than a 36-segment DrawCircleV.
 // Call after InitWindow().

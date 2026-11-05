@@ -5,7 +5,7 @@
 #include <thread>
 
 SistemColiziuni::SistemColiziuni(int latime, int inaltime, float marimeCelula)
-    : grid(marimeCelula, latime, inaltime),
+    : celulaBaza(marimeCelula), grid(marimeCelula, latime, inaltime),
       quadtree(Rectangle{0, 0, (float)latime, (float)inaltime},
                Config::QuadCapacitate, Config::QuadAdancimeMax) {
     unsigned hw = std::thread::hardware_concurrency();
@@ -16,12 +16,20 @@ SistemColiziuni::SistemColiziuni(int latime, int inaltime, float marimeCelula)
 // Single narrow-phase entry point: every algorithm counts comparisons the same way.
 void SistemColiziuni::Testeaza(const Obiecte& o, int a, int b, BufferThread& buf) {
     buf.comparatii++;
-    if (o.Ciocnire(a, b)) buf.perechi.emplace_back(a, b);
+    bool lovit = o.Ciocnire(a, b);
+    if (lovit) buf.perechi.emplace_back(a, b);
+    if (buf.inregistreaza && buf.examinate.size() < 4000) buf.examinate.push_back({a, b, lovit});
 }
 
 // ---------------- build phase (single-threaded) ----------------
 
 void SistemColiziuni::PregatesteGrid(const Obiecte& o) {
+    // A cell must be at least one ball diameter wide. With a giant ball around, grow the cells
+    // (and shrink back to the normal size once it is gone).
+    float razaMaxCurenta = 0.0f;
+    for (float r : o.raza) razaMaxCurenta = std::max(razaMaxCurenta, r);
+    float dorit = std::max(celulaBaza, 2.0f * razaMaxCurenta);
+    if (dorit != grid.MarimeCelula()) grid.Reconfigureaza(dorit);
     grid.Build(o.poz);
 }
 
@@ -117,6 +125,10 @@ void SistemColiziuni::Update(Obiecte& o, Algoritm algoritm) {
     }
 
     int nt = multithreading ? nrThreaduri : 1;
+    for (auto& b : buffere) {
+        b.examinate.clear();
+        b.inregistreaza = inregCandidati;
+    }
     for (int t = 0; t < nt; t++) {
         buffere[t].perechi.clear();
         buffere[t].comparatii = 0;
@@ -157,10 +169,36 @@ void SistemColiziuni::Update(Obiecte& o, Algoritm algoritm) {
     }
 
     float ms = std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    ultimulMs = ms;
     timpMs = (timpMs == 0.0f) ? ms : timpMs * 0.9f + ms * 0.1f;
 }
 
 void SistemColiziuni::DeseneazaDebug(Algoritm algoritm) const {
     if (algoritm == Algoritm::Grid) grid.Deseneaza();
     else if (algoritm == Algoritm::Quadtree) quadtree.Deseneaza();
+}
+
+void SistemColiziuni::DeseneazaHeatmap(const Obiecte& o) {
+    int coloane = grid.Coloane(), rinduri = grid.Rinduri();
+    heat.assign(coloane * rinduri, 0);
+    for (const Vector2& p : o.poz) heat[grid.CelulaY(p.y) * coloane + grid.CelulaX(p.x)]++;
+
+    float cs = grid.MarimeCelula();
+    for (int c = 0; c < coloane * rinduri; c++) {
+        if (heat[c] == 0) continue;
+        float t = std::min(1.0f, heat[c] / 10.0f);              // 10+ balls per cell = fully hot
+        Color rece = {60, 120, 255, 255}, cald = {255, 80, 80, 255};
+        Color col = {(unsigned char)(rece.r + (cald.r - rece.r) * t), (unsigned char)(rece.g + (cald.g - rece.g) * t),
+                     (unsigned char)(rece.b + (cald.b - rece.b) * t), (unsigned char)(255 * (0.10f + 0.32f * t))};
+        DrawRectangle((int)((c % coloane) * cs), (int)((c / coloane) * cs), (int)cs, (int)cs, col);
+    }
+}
+
+void SistemColiziuni::DeseneazaCandidati(const Obiecte& o) const {
+    for (const BufferThread& b : buffere)                    // misses first, hits on top
+        for (const Candidat& c : b.examinate)
+            if (!c.lovit) DrawLineV(o.poz[c.a], o.poz[c.b], Fade(WHITE, 0.14f));
+    for (const BufferThread& b : buffere)
+        for (const Candidat& c : b.examinate)
+            if (c.lovit) DrawLineEx(o.poz[c.a], o.poz[c.b], 2.0f, Fade(Color{255, 107, 129, 255}, 0.9f));
 }

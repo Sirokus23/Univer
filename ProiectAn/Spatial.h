@@ -13,6 +13,8 @@ public:
     int Coloane() const { return coloane; }
     int Rinduri() const { return rinduri; }
     int NrCelule() const { return coloane * rinduri; }
+    float MarimeCelula() const { return marimeCelula; }
+    void Reconfigureaza(float marimeNoua);       // change cell size (used when a giant ball appears)
     int CelulaX(float x) const;
     int CelulaY(float y) const;
 
@@ -43,6 +45,7 @@ public:
     void Insert(int id, Vector2 pozitie);
     void Interogare(const Rectangle& zona, std::vector<int>& rezultat) const;
     void Deseneaza() const;
+    void Frunze(std::vector<Rectangle>& rezultat) const;     // rectangles of all leaves (used by the explainer)
 
 private:
     struct Intrare { int id; Vector2 p; };
@@ -57,6 +60,7 @@ private:
     int CopilPentru(int nod, Vector2 p) const;
     void InterogareLa(int nod, const Rectangle& zona, std::vector<int>& rezultat) const;
     void DeseneazaLa(int nod) const;
+    void FrunzeLa(int nod, std::vector<Rectangle>& rezultat) const;
 
     std::vector<Nod> noduri;
     int nrNoduri = 1;

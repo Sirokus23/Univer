@@ -25,10 +25,15 @@ public:
 
     void Update(Obiecte& obiecte, Algoritm algoritm);
     void DeseneazaDebug(Algoritm algoritm) const;
+    void DeseneazaHeatmap(const Obiecte& obiecte);            // object density per grid cell
+    void DeseneazaCandidati(const Obiecte& obiecte) const;    // every pair the broad phase handed to the narrow phase
+    void SetInregistreazaCandidati(bool pornit) { inregCandidati = pornit; }
 
     int NumarComparatii() const { return comparatii; }
     int NumarPerechi() const { return perechiGasite; }
     float TimpMs() const { return timpMs; }          // smoothed, includes build + detect + resolve
+    float UltimulMs() const { return ultimulMs; }    // raw time of the last step
+    float CelulaGrid() const { return grid.MarimeCelula(); }
 
     void SetMultithreading(bool pornit) { multithreading = pornit; }
     bool Multithreading() const { return multithreading; }
@@ -36,9 +41,12 @@ public:
 
 private:
     using Pereche = std::pair<int, int>;
+    struct Candidat { int a, b; bool lovit; };
     struct BufferThread {
         std::vector<Pereche> perechi;
         std::vector<int> candidati;
+        std::vector<Candidat> examinate;    // only filled while "show pairs" is on (capped)
+        bool inregistreaza = false;
         int comparatii = 0;
     };
 
@@ -57,6 +65,10 @@ private:
     int comparatii = 0;
     int perechiGasite = 0;
     float timpMs = 0.0f;
+    float ultimulMs = 0.0f;
+    bool inregCandidati = false;
+    float celulaBaza;
+    std::vector<int> heat;
 
     bool multithreading = true;
     int nrThreaduri = 1;

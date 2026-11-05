@@ -31,14 +31,16 @@ void Obiecte::Update(float dt, int latimeEcran, int inaltimeEcran) {
         Vector2& v = viteza[i];
         float r = raza[i];
 
+        v.y += gravitatie * dt;
         p.x += v.x * dt;
         p.y += v.y * dt;
 
         // Clamp + force direction, so an object never gets stuck flipping velocity outside the screen.
-        if (p.x - r < 0)                  { p.x = r;                 v.x =  fabsf(v.x); }
-        else if (p.x + r > latimeEcran)   { p.x = latimeEcran - r;   v.x = -fabsf(v.x); }
-        if (p.y - r < 0)                  { p.y = r;                 v.y =  fabsf(v.y); }
-        else if (p.y + r > inaltimeEcran) { p.y = inaltimeEcran - r; v.y = -fabsf(v.y); }
+        const float e = restitutie;
+        if (p.x - r < 0)                  { p.x = r;                 v.x =  fabsf(v.x) * e; }
+        else if (p.x + r > latimeEcran)   { p.x = latimeEcran - r;   v.x = -fabsf(v.x) * e; }
+        if (p.y - r < 0)                  { p.y = r;                 v.y =  fabsf(v.y) * e; }
+        else if (p.y + r > inaltimeEcran) { p.y = inaltimeEcran - r; v.y = -fabsf(v.y) * e; }
 
         flash[i] = std::max(0.0f, flash[i] - dt * 4.0f);
     }
@@ -65,7 +67,7 @@ void Obiecte::Rezolva(int a, int b) {
     // Elastic impulse (e = 1) along the normal, weighted by inverse masses.
     float vn = (viteza[b].x - viteza[a].x) * nx + (viteza[b].y - viteza[a].y) * ny;
     if (vn < 0) {
-        float j = -2.0f * vn / (invM1 + invM2);
+        float j = -(1.0f + restitutie) * vn / (invM1 + invM2);
         viteza[a].x -= j * invM1 * nx;
         viteza[a].y -= j * invM1 * ny;
         viteza[b].x += j * invM2 * nx;
@@ -116,13 +118,27 @@ void Obiecte::Amortizeaza(float dt) {
     }
 }
 
-void Obiecte::Deseneaza(const Texture2D& cerc, float alpha) const {
+namespace {
+    // cool blue -> teal -> yellow -> hot red
+    Color ColoareViteza(float viteza) {
+        static const Color st[4] = {{80, 140, 255, 255}, {110, 230, 200, 255}, {255, 220, 100, 255}, {255, 90, 110, 255}};
+        float t = std::min(1.0f, viteza / Config::VitezaRosu) * 3.0f;
+        int k = (int)t;
+        if (k >= 3) return st[3];
+        float f = t - k;
+        return Color{(unsigned char)(st[k].r + (st[k + 1].r - st[k].r) * f),
+                     (unsigned char)(st[k].g + (st[k + 1].g - st[k].g) * f),
+                     (unsigned char)(st[k].b + (st[k + 1].b - st[k].b) * f), 255};
+    }
+}
+
+void Obiecte::Deseneaza(const Texture2D& cerc, float alpha, bool dupaViteza) const {
     Rectangle sursa = {0, 0, (float)cerc.width, (float)cerc.height};
     unsigned char a = (unsigned char)(255.0f * alpha);
     for (int i = 0; i < Size(); i++) {
         float r = raza[i];
         float f = flash[i];
-        Color c = culoare[i];
+        Color c = dupaViteza ? ColoareViteza(sqrtf(viteza[i].x * viteza[i].x + viteza[i].y * viteza[i].y)) : culoare[i];
         Color tinta = { (unsigned char)(c.r + (255 - c.r) * f),
                         (unsigned char)(c.g + (255 - c.g) * f),
                         (unsigned char)(c.b + (255 - c.b) * f), a };
@@ -131,12 +147,12 @@ void Obiecte::Deseneaza(const Texture2D& cerc, float alpha) const {
     }
 }
 
-void GenereazaObiecte(Obiecte& obiecte, int nr, int latimeEcran, int inaltimeEcran, std::mt19937& gen) {
-    const float margine = Config::RazaMax;
+void GenereazaObiecte(Obiecte& obiecte, int nr, int latimeEcran, int inaltimeEcran, std::mt19937& gen, float scara) {
+    const float margine = Config::RazaMax * scara;
     std::uniform_real_distribution<float> distX(margine, latimeEcran - margine);
     std::uniform_real_distribution<float> distY(margine, inaltimeEcran - margine);
     std::uniform_real_distribution<float> distV(-Config::VitezaMax, Config::VitezaMax);
-    std::uniform_real_distribution<float> distRaza(Config::RazaMin, Config::RazaMax);
+    std::uniform_real_distribution<float> distRaza(Config::RazaMin * scara, Config::RazaMax * scara);
     std::uniform_int_distribution<int> distPalet(0, nrPalet - 1);
 
     for (int i = 0; i < nr; i++)
@@ -149,6 +165,13 @@ void GenereazaObiectLa(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen) {
     std::uniform_real_distribution<float> distRaza(Config::RazaMin, Config::RazaMax);
     std::uniform_int_distribution<int> distPalet(0, nrPalet - 1);
     obiecte.Adauga(pozitie, Vector2{distV(gen), distV(gen)}, distRaza(gen), palet[distPalet(gen)]);
+}
+
+void GenereazaGigant(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen) {
+    std::uniform_real_distribution<float> distV(-Config::VitezaMax, Config::VitezaMax);
+    std::uniform_real_distribution<float> distRaza(Config::RazaGigantMin, Config::RazaGigantMax);
+    std::uniform_int_distribution<int> distPalet(0, nrPalet - 1);
+    obiecte.Adauga(pozitie, Vector2{distV(gen) * 0.5f, distV(gen) * 0.5f}, distRaza(gen), palet[distPalet(gen)]);
 }
 
 Texture2D CreeazaTexturaCerc() {

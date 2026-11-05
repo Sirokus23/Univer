@@ -8,6 +8,13 @@ SpatialGrid::SpatialGrid(float dimensiune, int lat, int inalt)
     start.assign(coloane * rinduri + 1, 0);
 }
 
+void SpatialGrid::Reconfigureaza(float marimeNoua) {
+    marimeCelula = marimeNoua;
+    coloane = (int)(latime / marimeCelula) + 1;
+    rinduri = (int)(inaltime / marimeCelula) + 1;
+    start.assign(coloane * rinduri + 1, 0);
+}
+
 int SpatialGrid::CelulaX(float x) const {
     return std::max(0, std::min((int)(x / marimeCelula), coloane - 1));
 }
@@ -122,3 +129,13 @@ void Quadtree::DeseneazaLa(int nod) const {
 }
 
 void Quadtree::Deseneaza() const { DeseneazaLa(0); }
+
+void Quadtree::FrunzeLa(int nod, std::vector<Rectangle>& rezultat) const {
+    if (noduri[nod].primCopil == -1) { rezultat.push_back(noduri[nod].limite); return; }
+    for (int i = 0; i < 4; i++) FrunzeLa(noduri[nod].primCopil + i, rezultat);
+}
+
+void Quadtree::Frunze(std::vector<Rectangle>& rezultat) const {
+    rezultat.clear();
+    FrunzeLa(0, rezultat);
+}
