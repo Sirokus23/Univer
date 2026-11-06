@@ -43,6 +43,7 @@ void DeseneazaHud(const DateHud& d) {
     Panou(x, y, w, h);
     DrawRectangleRounded(Rectangle{x, y + 14, 5, 34}, 1.0f, 4, accent);
     DrawText(NumeAlgoritm(d.algoritm), (int)x + 20, (int)y + 16, 28, accent);
+    if (d.layout) DrawText(d.layout, (int)x + 20, (int)y + 46, 14, Tema::TextGri);
 
     // TextFormat only keeps a few rotating buffers, so each value is drawn right after it is formatted.
     float ry = y + 62;
@@ -126,7 +127,7 @@ void DeseneazaHud(const DateHud& d) {
 }
 
 void DeseneazaAjutor() {
-    const char* l1 = "LMB repel   |   Shift+LMB or MMB attract   |   RMB spawn   |   M giant ball   |   Wheel field size   |   UP/DOWN +-100   PGUP/PGDN +-1000   |   C clear";
+    const char* l1 = "LMB repel   |   Shift+LMB or MMB attract   |   RMB spawn   |   M giant ball   |   L layout presets   |   Wheel field size   |   UP/DOWN +-100   PGUP/PGDN +-1000   |   C clear";
     const char* l2 = "1-4 algorithm   |   T threads   |   H heatmap   P pairs   V speed colours   K trails   G gravity   B bounce   |   SPACE pause   |   F12 screenshot   |   ESC menu";
     int size = 17;
     int w = std::max(MeasureText(l1, size), MeasureText(l2, size));

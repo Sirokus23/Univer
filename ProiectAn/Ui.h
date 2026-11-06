@@ -46,6 +46,7 @@ struct DateHud {
     const Istoric* istoric = nullptr;
     const StatisticiAlgoritm* statistici = nullptr;   // array of 4, indexed by Algoritm
     Comutatoare comut;
+    const char* layout = nullptr;                    // e.g. "Even: best case for the grid"
 };
 
 void DeseneazaHud(const DateHud& d);

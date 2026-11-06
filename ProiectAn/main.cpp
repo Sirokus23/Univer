@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <memory>
 #include <random>
+#include <string>
 
 enum class Stare { Meniu, Simulare, Explicatie, Benchmark };
 
@@ -49,6 +50,8 @@ int main() {
     int idxRestitutie = 0;
     Istoric istoric;
     StatisticiAlgoritm statistici[4];
+    int idxLayout = -1;                   // -1 = no preset loaded
+    std::string textLayout;
 
     Camera2D camera{};
     auto actualizeazaCamera = [&] {
@@ -88,6 +91,8 @@ int main() {
                 comut = Comutatoare{};
                 idxRestitutie = 0;
                 istoric = Istoric{};
+                idxLayout = -1;
+                textLayout.clear();
                 for (auto& s : statistici) s = StatisticiAlgoritm{};
                 sistem.SetInregistreazaCandidati(false);
                 stare = Stare::Simulare;
@@ -130,7 +135,14 @@ int main() {
         if (IsKeyPressed(KEY_THREE))  mod = Algoritm::Quadtree;
         if (IsKeyPressed(KEY_FOUR))   mod = Algoritm::SweepAndPrune;
         if (IsKeyPressed(KEY_T))      sistem.SetMultithreading(!sistem.Multithreading());
-        if (IsKeyPressed(KEY_C))      obiecte.EliminaUltimele(obiecte.Size());
+        if (IsKeyPressed(KEY_C))      { obiecte.EliminaUltimele(obiecte.Size()); idxLayout = -1; textLayout.clear(); }
+        if (IsKeyPressed(KEY_L)) {
+            idxLayout = (idxLayout + 1) % NrLayouturi;
+            Layout l = (Layout)idxLayout;
+            GenereazaLayout(obiecte, l, Config::Latime, Config::Inaltime, gen);
+            textLayout = std::string("Layout (L): ") + NumeLayout(l) + " - " + DescriereLayout(l);
+            for (auto& s : statistici) s = StatisticiAlgoritm{};      // old numbers belong to another arrangement
+        }
 
         if (IsKeyPressed(KEY_H)) comut.heatmap = !comut.heatmap;
         if (IsKeyPressed(KEY_P)) { comut.perechi = !comut.perechi; sistem.SetInregistreazaCandidati(comut.perechi); }
@@ -222,6 +234,7 @@ int main() {
             hud.istoric = &istoric;
             hud.statistici = statistici;
             hud.comut = comut;
+            hud.layout = textLayout.empty() ? nullptr : textLayout.c_str();
             DeseneazaHud(hud);
             DeseneazaAjutor();
             if (pauza) DeseneazaPauza();

@@ -43,6 +43,7 @@ The game renders at a virtual 1920x1080 and is scaled to the window (black bars 
 | Mouse wheel | field size |
 | Right mouse | spawn a ball (hold for a stream) |
 | M | spawn a giant ball at the cursor (the grid grows its cells automatically) |
+| L | cycle **layout presets** (see below) |
 | UP / DOWN | +/- 100 balls |
 | PgUp / PgDn | +/- 1000 balls |
 | C | clear all |
@@ -62,6 +63,21 @@ The game renders at a virtual 1920x1080 and is scaled to the window (black bars 
 The panel on the left shows comparisons per step, collisions, collision time, a live frame-time graph
 (coloured by algorithm, so switching algorithms shows up as a colour change in the line) and a table with the
 last measurement of every algorithm. Rows that were measured at a different object count are dimmed.
+
+## Layout presets (best / typical / worst cases)
+
+Press **L** in the sandbox. Every preset except Random starts frozen, so you can press 1-4 and compare all four algorithms on exactly the same arrangement (the HUD table keeps the numbers). Comparisons per step, measured by the test suite:
+
+| Layout | Balls | Brute | Grid | Quadtree | Sweep & Prune | What it shows |
+|--------|------:|------:|-----:|---------:|--------------:|---------------|
+| Random | 1000 | 499,500 | 5,282 | 3,503 | 12,908 | typical case |
+| Even | 1000 | 499,500 | 5,092 | 3,397 | 11,408 | best case for the grid |
+| Clumps | 1000 | 499,500 | 39,696 | 12,521 | 26,349 | grid struggles, quadtree adapts |
+| Pile | 500 | 124,750 | 124,750 | 60,564 | 70,161 | worst case: the grid degrades to brute force |
+| Band | 120 | 7,140 | 978 | 669 | 7,103 | worst case for sweep and prune: everything overlaps on x |
+| Giant | 401 | 80,200 | 1,515 | 1,041 | 2,472 | the grid has to enlarge its cells |
+
+(Exact numbers vary slightly with the random seed. Brute force never changes: it always tests every pair.)
 
 ## HOW IT WORKS
 

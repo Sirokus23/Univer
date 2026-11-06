@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace Config {
-    constexpr int Latime = 1820;
+    constexpr int Latime = 1920;
     constexpr int Inaltime = 1080;
 
     constexpr int PasMic = 100;          // UP / DOWN
@@ -74,6 +74,14 @@ struct Obiecte {
 void GenereazaObiecte(Obiecte& obiecte, int nr, int latimeEcran, int inaltimeEcran, std::mt19937& gen, float scara = 1.0f);
 void GenereazaObiectLa(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen);
 void GenereazaGigant(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen);
+
+// ---- layout presets (key L): the same scene for every algorithm, so the cases can be compared ----
+enum class Layout { Aleator, Uniform, Ciorchini, Teanc, Banda, Gigant };
+inline constexpr int NrLayouturi = 6;
+const char* NumeLayout(Layout l);
+const char* DescriereLayout(Layout l);
+// Replaces all objects. Everything except Aleator starts frozen (zero velocity) so the arrangement stays put.
+void GenereazaLayout(Obiecte& obiecte, Layout l, int latimeEcran, int inaltimeEcran, std::mt19937& gen);
 
 // Pre-rendered shaded ball: one textured quad is much cheaper than a 36-segment DrawCircleV.
 // Call after InitWindow().

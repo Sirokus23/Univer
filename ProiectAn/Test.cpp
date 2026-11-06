@@ -133,6 +133,32 @@ int main() {
         Verifica(linii == 21, "CSV has header + 20 rows");
     }
 
+    std::printf("7. layout presets: valid, and all algorithms agree (comparisons per step shown)\n");
+    {
+        std::printf("    %-8s %6s %8s | %10s %10s %10s %10s\n", "layout", "balls", "pairs", "brute", "grid", "quadtree", "sweep");
+        for (int li = 0; li < NrLayouturi; li++) {
+            Obiecte o; GenereazaLayout(o, (Layout)li, L, I, gen);
+            bool valid = o.Size() > 0;
+            for (int i = 0; i < o.Size(); i++)
+                valid = valid && o.poz[i].x >= o.raza[i] && o.poz[i].x <= L - o.raza[i] && o.poz[i].y >= o.raza[i] && o.poz[i].y <= I - o.raza[i];
+            int ref = PerechiReale(o);
+            int comp[4] = {0, 0, 0, 0};
+            bool acord = true;
+            for (int a = 0; a < 4; a++) {
+                Obiecte copie = o;
+                SistemColiziuni s(L, I, Config::MarimeCelula);
+                s.SetMultithreading(false);
+                s.Update(copie, toate[a]);
+                comp[a] = s.NumarComparatii();
+                acord = acord && s.NumarPerechi() == ref;
+            }
+            std::printf("    %-8s %6d %8d | %10d %10d %10d %10d\n", NumeLayout((Layout)li), o.Size(), ref, comp[0], comp[1], comp[2], comp[3]);
+            Verifica(valid && acord, NumeLayout((Layout)li));
+        }
+        Obiecte e; GenereazaLayout(e, Layout::Uniform, L, I, gen);
+        Verifica(PerechiReale(e) == 0, "'Even' layout starts with no overlaps");
+    }
+
     std::printf(bad ? "\n%d FAILURE(S)\n" : "\nALL TESTS PASSED\n", bad);
     return bad ? 1 : 0;
 }

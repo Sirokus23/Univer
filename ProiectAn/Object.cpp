@@ -174,6 +174,93 @@ void GenereazaGigant(Obiecte& obiecte, Vector2 pozitie, std::mt19937& gen) {
     obiecte.Adauga(pozitie, Vector2{distV(gen) * 0.5f, distV(gen) * 0.5f}, distRaza(gen), palet[distPalet(gen)]);
 }
 
+const char* NumeLayout(Layout l) {
+    switch (l) {
+        case Layout::Aleator:   return "Random";
+        case Layout::Uniform:   return "Even";
+        case Layout::Ciorchini: return "Clumps";
+        case Layout::Teanc:     return "Pile";
+        case Layout::Banda:     return "Band";
+        case Layout::Gigant:    return "Giant";
+    }
+    return "?";
+}
+
+const char* DescriereLayout(Layout l) {
+    switch (l) {
+        case Layout::Aleator:   return "typical case";
+        case Layout::Uniform:   return "best case for the grid";
+        case Layout::Ciorchini: return "grid struggles, quadtree adapts";
+        case Layout::Teanc:     return "worst case for everything";
+        case Layout::Banda:     return "worst case for sweep & prune";
+        case Layout::Gigant:    return "grid cells have to grow";
+    }
+    return "";
+}
+
+void GenereazaLayout(Obiecte& o, Layout l, int W, int H, std::mt19937& gen) {
+    o.EliminaUltimele(o.Size());                 // keeps gravity / restitution settings
+    const float m = Config::RazaMax;
+    std::uniform_real_distribution<float> dr(Config::RazaMin, Config::RazaMax), u01(0.0f, 1.0f);
+    std::uniform_int_distribution<int> dp(0, nrPalet - 1);
+    auto bila = [&](float x, float y, float r) {
+        x = std::clamp(x, r, W - r);
+        y = std::clamp(y, r, H - r);
+        o.Adauga(Vector2{x, y}, Vector2{0, 0}, r, palet[dp(gen)]);
+    };
+
+    // jittered lattice, always wide enough that no two balls touch
+    auto grila = [&](int n, bool lasaLocGigantului) {
+        int cols = std::max(1, (int)lroundf(sqrtf(n * (W - 2 * m) / (H - 2 * m))));
+        int rows = (n + cols - 1) / cols;
+        float cw = (W - 2 * m) / cols, ch = (H - 2 * m) / rows;
+        float jit = std::max(0.0f, std::min(cw, ch) / 2.0f - m - 1.0f);
+        std::uniform_real_distribution<float> dj(-jit, jit);
+        int pus = 0;
+        for (int r = 0; r < rows && pus < n; r++)
+            for (int c = 0; c < cols && pus < n; c++) {
+                float x = m + (c + 0.5f) * cw, y = m + (r + 0.5f) * ch;
+                if (lasaLocGigantului && hypotf(x - W / 2.0f, y - H / 2.0f) < Config::RazaGigantMax + m + 4.0f) continue;
+                bila(x + (jit > 0 ? dj(gen) : 0.0f), y + (jit > 0 ? dj(gen) : 0.0f), dr(gen));
+                pus++;
+            }
+    };
+
+    switch (l) {
+        case Layout::Aleator:
+            GenereazaObiecte(o, 1000, W, H, gen);           // the only preset that keeps moving
+            break;
+        case Layout::Uniform:
+            grila(1000, false);
+            break;
+        case Layout::Ciorchini: {
+            std::uniform_real_distribution<float> cx(0.15f * W, 0.85f * W), cy(0.15f * H, 0.85f * H);
+            Vector2 centre[5];
+            for (Vector2& c : centre) c = {cx(gen), cy(gen)};
+            std::normal_distribution<float> g(0.0f, 60.0f);
+            for (int i = 0; i < 1000; i++) {
+                const Vector2& c = centre[i % 5];
+                bila(c.x + g(gen), c.y + g(gen), dr(gen));
+            }
+            break;
+        }
+        case Layout::Teanc:                                  // 500 balls piled into a 40 px disc
+            for (int i = 0; i < 500; i++) {
+                float ang = u01(gen) * 6.2831853f, d = sqrtf(u01(gen)) * 40.0f;
+                bila(W / 2.0f + cosf(ang) * d, H / 2.0f + sinf(ang) * d, dr(gen));
+            }
+            break;
+        case Layout::Banda:                                  // all balls share (almost) the same x range
+            for (int i = 0; i < 120; i++)
+                bila(W / 2.0f + (u01(gen) - 0.5f) * 24.0f, m + u01(gen) * (H - 2 * m), dr(gen));
+            break;
+        case Layout::Gigant:
+            grila(400, true);
+            o.Adauga(Vector2{W / 2.0f, H / 2.0f}, Vector2{0, 0}, Config::RazaGigantMax, palet[dp(gen)]);
+            break;
+    }
+}
+
 Texture2D CreeazaTexturaCerc() {
     // White, fully transparent start so mipmap filtering doesn't create dark fringes.
     Image img = GenImageColor(64, 64, Color{255, 255, 255, 0});
